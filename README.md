@@ -2,125 +2,185 @@
 
 **Team:** Group 6  
 **Institution:** Vellore Institute of Technology (VIT)  
-**Primary Language:** MATLAB  
+**Primary Language:** MATLAB
 
 ---
 
 ## 📖 Project Overview
-Continuous monitoring of the cryosphere is critical for tracking climate-driven mass loss. This project presents a novel, automated computational architecture that fuses **Polarimetric Interferometric SAR (PolInSAR)** physics with **self-supervised spatial Deep Learning**. 
+
+Continuous monitoring of the cryosphere is critical for tracking climate-driven mass loss. This project presents a novel, automated computational architecture that fuses Polarimetric Interferometric SAR (PolInSAR) physics with self-supervised spatial Deep Learning.
 
 Using L-band ALOS PALSAR Level 1.1 Single Look Complex (SLC) data, this pipeline:
-1. Inverts the Random Volume over Ground (RVoG) model to extract 3D macroscopic snow penetration depth.
-2. Mathematically co-registers multi-temporal orbital epochs to quantify seasonal mass loss via Change in Snow Water Equivalent (Δ SWE).
-3. Utilizes deterministic physical thresholds to autonomously generate pseudo-labels, training a medical-grade **U-Net Convolutional Neural Network** to segment complex glacier facies (meltwater, crevasses, snow volume) while overcoming inherent radar speckle.
+
+- **Inverts the Random Volume over Ground (RVoG) model** to extract 3D macroscopic snow penetration depth
+- **Mathematically co-registers multi-temporal orbital epochs** to quantify seasonal mass loss via Change in Snow Water Equivalent (Δ SWE)
+- **Utilizes deterministic physical thresholds** to autonomously generate pseudo-labels, training a medical-grade U-Net Convolutional Neural Network to segment complex glacier facies (meltwater, crevasses, snow volume) while overcoming inherent radar speckle
 
 ---
 
 ## 🗂️ Repository Structure
-```text
-├── read_alos_slc.m             # Phase I: PolInSAR Physics & 3D RVoG Inversion
-├── phase2_change_detection.m   # Phase II: Spatial Co-Registration & Δ SWE
-├── phase3_unet_spatial.m       # Phase III: U-Net Semantic Segmentation
-├── .gitignore                  # Prevents massive L1.1 datasets from uploading
-└── README.md                   # Project documentation
 
-(Note: Output figures and PDF reports are generated locally upon execution and are not tracked in this repository to maintain a lightweight codebase).
-📡 Dataset Acquisition (Required to Run)
+```
+RADAR/
+├── read_alos_slc.m               # Phase I: PolInSAR Physics & 3D RVoG Inversion
+├── phase2_change_detection.m     # Phase II: Spatial Co-Registration & Δ SWE
+├── phase3_unet_spatial.m         # Phase III: U-Net Semantic Segmentation
+├── .gitignore                    # Prevents massive L1.1 datasets from uploading
+└── README.md                     # Project documentation
+```
+
+**Note:** Output figures and PDF reports are generated locally upon execution and are not tracked in this repository to maintain a lightweight codebase.
+
+---
+
+## 📡 Dataset Acquisition (Required to Run)
 
 Due to GitHub's 100 MB file limit, the massive Level 1.1 SAR datasets are not included in this repository. To execute the code, you must download the raw binary data directly from NASA's Alaska Satellite Facility (ASF).
 
-Required Datasets (ALOS PALSAR Level 1.1 SLC - Frame 0990):
+### Required Datasets (ALOS PALSAR Level 1.1 SLC - Frame 0990)
 
-    Epoch 1 (Winter Baseline): ALPSRP233170990-H1.1__A
+| Epoch | Description | Dataset ID |
+|-------|-------------|-----------|
+| Epoch 1 | Winter Baseline | ALPSRP233170990-H1.1__A |
+| Epoch 2 | Summer Melt | ALPSRP252570990-H1.1__A |
 
-    Epoch 2 (Summer Melt): ALPSRP252570990-H1.1__A
+### Download Instructions
 
-Download Instructions:
+1. Create a free research account at [NASA Earthdata](https://earthdata.nasa.gov/)
+2. Navigate to the [ASF DAAC Vertex Search Portal](https://vertex.daac.asf.alaska.edu/)
+3. Configure search parameters:
+   - **Dataset:** ALOS PALSAR
+   - **File Type:** L1.1 (SLC)
+   - **Beam Mode:** FBD (Fine Beam Dual)
+   - **Search Orbit Numbers:** 23317 and 25257
+4. Download and extract datasets into the project root folder
 
-    Create a free research account at NASA Earthdata.
+---
 
-    Navigate to the ASF DAAC Vertex Search Portal.
+## ⚙️ Installation & Prerequisites
 
-    In the search filters, set the dataset to ALOS PALSAR.
+This pipeline was engineered natively in MATLAB.
 
-    Set the File Type to L1.1 (SLC) and Beam Mode to FBD (Fine Beam Dual).
+### Required Software
 
-    Search for the specific orbit numbers: 23317 and 25257.
+- **MATLAB** R2023a or newer
 
-    Download the resulting .zip files and extract them directly into the root directory of this repository.
+### Required MATLAB Toolboxes
 
-⚙️ Installation & Prerequisites
+- Image Processing Toolbox
+- Computer Vision Toolbox
+- Deep Learning Toolbox
 
-This pipeline was engineered natively in MATLAB. No external Python dependencies or conda environments are required.
+---
 
-Required Software:
+## 🚀 Usage & Execution
 
-    MATLAB (R2023a or newer recommended for updated unetLayers support)
+⚠️ **Important:** Update `base_dir` and `dir_cycle1` paths inside the `.m` files to match your local extraction paths before running.
 
-Required MATLAB Toolboxes:
+### Phase 1: Physical Feature Extraction
 
-    Image Processing Toolbox
+**File:** `read_alos_slc.m`
 
-    Computer Vision Toolbox
+Run this script to perform the initial PolInSAR physics-based analysis:
 
-    Deep Learning Toolbox
+```matlab
+read_alos_slc
+```
 
-🚀 Usage & Execution
+**Operations:**
+- Loads raw complex SAR data
+- Generates Pauli composite
+- Performs RVoG inversion
+- Outputs 3D snow depth
 
-To replicate the study, execute the scripts sequentially.
+---
 
-Important Path Configuration: Before running the scripts, open each .m file and update the base_dir / dir_cycle1 variables at the top of the code to match the absolute path where you extracted your downloaded NASA datasets.
-Phase 1: Physical Feature Extraction
+### Phase 2: Climate Metrics
 
-Run read_alos_slc.m
+**File:** `phase2_change_detection.m`
 
-    Ingests the raw complex binary files.
+Run this script to quantify temporal changes and mass loss:
 
-    Generates the Dual-Pol Pseudo-Pauli scattering composite.
+```matlab
+phase2_change_detection
+```
 
-    Executes RVoG volumetric inversion to calculate 3D snow depth.
+**Operations:**
+- Performs image registration (`imregtform`)
+- Computes Δ SWE (Change in Snow Water Equivalent)
+- Generates temporal change maps
 
-    Note: Do not clear the workspace after running. Phase 3 depends on the variables generated here.
+---
 
-Phase 2: Climate Metrics
+### Phase 3: Deep Learning Segmentation
 
-Run phase2_change_detection.m
+**File:** `phase3_unet_spatial.m`
 
-    Loads both the Winter and Summer epochs.
+Run this script to train and apply the U-Net model:
 
-    Executes phase-correlation co-registration (imregtform).
+```matlab
+phase3_unet_spatial
+```
 
-    Calculates absolute mass loss (Δ SWE).
+**Operations:**
+- Builds `pixelLabelDatastore` with pseudo-labeled training data
+- Trains U-Net semantic segmentation model
+- Outputs high-resolution facies segmentation map
 
-Phase 3: Spatial Deep Learning
+---
 
-Run phase3_unet_spatial.m
+## 📊 Core Results
 
-    Constructs a hybrid Memory-Disk pixelLabelDatastore to bypass MATLAB RAM limitations.
+Execution generates the following outputs:
 
-    Trains a U-Net architecture on 128x128 spatial patches.
+- **Subsurface glacier tomographic profiles** – 3D visualization of snow penetration and volume structure
+- **Δ SWE mass loss climate maps** – Quantitative seasonal mass loss estimates
+- **High-resolution spatial facies segmentation** – 3000×3000 pixel glacier facies classification maps distinguishing meltwater, crevasses, and snow volumes
 
-    Executes spatial inference to generate the final, high-resolution Glacier Facies Classification map.
+---
 
-📊 Core Results
+## 🔬 Technical Architecture
 
-By executing the pipeline, the system will autonomously generate:
+### Phase I: RVoG Inversion
+- Exploits dual-polarization PolInSAR coherence matrices
+- Inverts Random Volume over Ground model to extract macroscopic penetration depth
+- Fundamental physics enables automated pseudo-label generation
 
-    Subsurface Tomographic Profiles: "X-Ray" cross-sections of the glacier down to 15 meters.
+### Phase II: Change Detection
+- Multi-temporal co-registration using intensity correlation
+- Computes phase-based elevation differences
+- Converts elevation change to Δ SWE using snow density models
 
-    Δ SWE Climate Maps: Divergent color mapping highlighting zones of severe summer hydrologic runoff.
+### Phase III: U-Net Segmentation
+- Self-supervised training via deterministic physics thresholds
+- Encoder-decoder architecture with skip connections
+- Robust to SAR speckle and complex facies transitions
 
-    Journal-Grade AI Segmentation: A 3000x3000 resolution mapping of continuous physical geometries (crevasses, meltwater channels) previously obscured by radar speckle.
+---
 
-Developed by Group 6 for Advanced Radar Remote Sensing and Polar Ice Monitoring.
+## 📝 Citation
 
+If you use this project in your research, please cite:
 
-***
+```
+Group 6, VIT. "An End-to-End L-Band PolInSAR Architecture for Glacier Facies 
+Segmentation and Temporal Mass Loss Quantification using U-Net Deep Learning." 
+Vellore Institute of Technology, 2024.
+```
 
-### **A Quick Note on Your Code Paths**
-Before your professor runs your code from GitHub, they will need to change the folder paths. In your code, you currently have:
-`base_dir = 'C:\Users\harsh\Harsh\VIT\sem6\radar\ALPSRP233170990-H1.1__A';`
+---
 
-The README instructs them to change this to their own computer's path, so you are totally covered. 
+## 📧 Support & Contact
 
-Your GitHub repository is now completely ready to be viewed by professionals, recruiters, and profe
+For questions regarding dataset acquisition, methodology, or execution issues, please refer to the individual script documentation or contact your course instructor.
+
+---
+
+## 📜 License
+
+This project is provided for educational and research purposes through VIT.
+
+---
+
+**Last Updated:** March 2026  
+**Status:** Active Development
